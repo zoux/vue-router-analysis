@@ -1,82 +1,18 @@
-# vue-router [![Build Status](https://img.shields.io/circleci/project/github/vuejs/vue-router/dev.svg)](https://circleci.com/gh/vuejs/vue-router)
+# vue-router
 
-> This is vue-router 3.0 which works only with Vue 2.0. For the 1.x router see the [1.0 branch](https://github.com/vuejs/vue-router/tree/1.0).
+## 核心阶段
 
-### Introduction
+#### install
 
-`vue-router` is the official router for [Vue.js](http://vuejs.org). It deeply integrates with Vue.js core to make building Single Page Applications with Vue.js a breeze. Features include:
+1. 利用 Vue.mixin beforeCreate 注入 _routerRoot _router 到根实例，同时在根实例完成 router.init。
+2. 代理 $router $route 到所有实例，注册全局组件 RouterView RouterLink。
 
-- Nested route/view mapping
-- Modular, component-based router configuration
-- Route params, query, wildcards
-- View transition effects powered by Vue.js' transition system
-- Fine-grained navigation control
-- Links with automatic active CSS classes
-- HTML5 history mode or hash mode, with auto-fallback in IE9
-- Customizable Scroll Behavior
+#### init
 
-Get started with the [documentation](http://router.vuejs.org), or play with the [examples](https://github.com/vuejs/vue-router/tree/dev/examples) (see how to run them below).
+1. 通过 history 来确定不同路由的切换动作动作 history.transitionTo。
+2. 通过 history.listen 来注册路由变化的响应回调。
 
-### Development Setup
+#### HashHistory 实例化
 
-``` bash
-# install deps
-npm install
-
-# build dist files
-npm run build
-
-# serve examples at localhost:8080
-npm run dev
-
-# lint & run all tests
-npm test
-
-# serve docs at localhost:8080
-npm run docs
-```
-
-## Releasing
-
-- `yarn run release`
-  - Ensure tests are passing `yarn run test`
-  - Build dist files `VERSION=<the_version> yarn run build`
-  - Build changelog `yarn run changelog`
-  - Commit dist files `git add dist CHANGELOG.md && git commit -m "[build $VERSION]"`
-  - Publish a new version `npm version $VERSION --message "[release] $VERSION"
-  - Push tags `git push origin refs/tags/v$VERSION && git push`
-  - Publish to npm `npm publish`
-
-## Questions
-
-For questions and support please use the [Discord chat server](https://chat.vuejs.org) or [the official forum](http://forum.vuejs.org). The issue list of this repo is **exclusively** for bug reports and feature requests.
-
-## Issues
-
-Please make sure to read the [Issue Reporting Checklist](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#issue-reporting-guidelines) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
-
-## Contribution
-
-Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md) before making a pull request.
-
-## Changelog
-
-Details changes for each release are documented in the [release notes](https://github.com/vuejs/vue-router/releases).
-
-## Stay In Touch
-
-- For latest releases and announcements, follow on Twitter: [@vuejs](https://twitter.com/vuejs)
-
-## License
-
-[MIT](http://opensource.org/licenses/MIT)
-
-Copyright (c) 2013-present Evan You
-
-## Special Thanks
-
-<a href="https://www.browserstack.com">
-  <img src="/assets/browserstack-logo-600x315.png" height="80" title="BrowserStack Logo" alt="BrowserStack Logo" />
-</a>
-
-Special thanks to [BrowserStack](https://www.browserstack.com) for letting the maintainers use their service to debug browser specific issues.
+1. 针对因不支持 history api 而来实例化 HashHistory 的，进行降级处理。
+2. 保证默认进入的时候对应的 hash 值是以 / 开头的，如果不是则替换。

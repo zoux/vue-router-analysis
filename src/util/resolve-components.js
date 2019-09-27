@@ -4,17 +4,16 @@ import { _Vue } from '../install'
 import { warn, isError } from './warn'
 
 export function resolveAsyncComponents (matched: Array<RouteRecord>): Function {
+  // 返回“异步”钩子函数
   return (to, from, next) => {
     let hasAsync = false
     let pending = 0
     let error = null
 
     flatMapComponents(matched, (def, _, match, key) => {
-      // if it's a function and doesn't have cid attached,
-      // assume it's an async component resolve function.
-      // we are not using Vue's default async resolving mechanism because
-      // we want to halt the navigation until the incoming component has been
-      // resolved.
+      // 这里假定 if 路由上定义的组件是函数 && 没有 options，就认为他是一个异步组件。
+      // 这里并没有使用 Vue 默认的异步机制的原因是我们希望在得到真正的异步组件之前
+      // 整个的路由导航是一直处于挂起状态
       if (typeof def === 'function' && def.cid === undefined) {
         hasAsync = true
         pending++
@@ -74,14 +73,17 @@ export function flatMapComponents (
   fn: Function
 ): Array<?Function> {
   return flatten(matched.map(m => {
+    // 遍历得到组件的 template, instance, match，和组件名
     return Object.keys(m.components).map(key => fn(
       m.components[key],
       m.instances[key],
-      m, key
+      m,
+      key
     ))
   }))
 }
 
+// 抹平数组得到一个一维数组
 export function flatten (arr: Array<any>): Array<any> {
   return Array.prototype.concat.apply([], arr)
 }

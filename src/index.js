@@ -41,6 +41,8 @@ export default class VueRouter {
     this.afterHooks = []
     this.matcher = createMatcher(options.routes || [], this)
 
+    // 首先根据mode来确定所选的模式，如果当前环境不支持history模式，会强制切换到hash模式；
+    // 如果当前环境不是浏览器环境，会切换到abstract模式下。然后再根据不同模式来生成不同的history操作对象。
     let mode = options.mode || 'hash'
     this.fallback = mode === 'history' && !supportsPushState && options.fallback !== false
     if (this.fallback) {
@@ -100,8 +102,7 @@ export default class VueRouter {
       if (this.app === app) this.app = this.apps[0] || null
     })
 
-    // main app previously initialized
-    // return as we don't need to set up new history listener
+    // 防止重复初始化
     if (this.app) {
       return
     }
@@ -110,6 +111,7 @@ export default class VueRouter {
 
     const history = this.history
 
+    // 根据history类型，来确定不同路由的切换动作动作 history.transitionTo
     if (history instanceof HTML5History) {
       history.transitionTo(history.getCurrentLocation())
     } else if (history instanceof HashHistory) {
@@ -123,6 +125,7 @@ export default class VueRouter {
       )
     }
 
+    // 通过 history.listen 来注册路由变化的响应回调
     history.listen(route => {
       this.apps.forEach((app) => {
         app._route = route
