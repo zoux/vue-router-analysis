@@ -26,7 +26,7 @@ export function install (Vue) {
         // 将 router 作为根实例属性，并执行 init
         this._router = this.$options.router
         this._router.init(this)
-        // 响应式响应路由的更新
+        // 使用Vue.util.defineReactive将实例的_route属性设置为响应式
         Vue.util.defineReactive(this, '_route', this._router.history.current)
       } else {
         this._routerRoot = (this.$parent && this.$parent._routerRoot) || this

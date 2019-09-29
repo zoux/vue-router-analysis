@@ -14,18 +14,19 @@ export function createRouteMap (
   pathMap: Dictionary<RouteRecord>,
   nameMap: Dictionary<RouteRecord>
 } {
-  // the path list is used to control path matching priority
+  // pathList，pathMap，nameMap支持后续的动态添加
   const pathList: Array<string> = oldPathList || []
   // $flow-disable-line
   const pathMap: Dictionary<RouteRecord> = oldPathMap || Object.create(null)
   // $flow-disable-line
   const nameMap: Dictionary<RouteRecord> = oldNameMap || Object.create(null)
 
+  // 遍历路由列表
   routes.forEach(route => {
     addRouteRecord(pathList, pathMap, nameMap, route)
   })
 
-  // ensure wildcard routes are always at the end
+  // 将通配符的路径, push到pathList的末尾
   for (let i = 0, l = pathList.length; i < l; i++) {
     if (pathList[i] === '*') {
       pathList.push(pathList.splice(i, 1)[0])
@@ -74,12 +75,16 @@ function addRouteRecord (
 
   const pathToRegexpOptions: PathToRegexpOptions =
     route.pathToRegexpOptions || {}
+
+  // normalizePath, 会对path进行格式化
+  // 会删除末尾的/，如果route是子级，会连接父级和子级的path，形成一个完整的path
   const normalizedPath = normalizePath(path, parent, pathToRegexpOptions.strict)
 
   if (typeof route.caseSensitive === 'boolean') {
     pathToRegexpOptions.sensitive = route.caseSensitive
   }
 
+  // 创建一个完整的路由对象
   const record: RouteRecord = {
     path: normalizedPath,
     regex: compileRouteRegex(normalizedPath, pathToRegexpOptions),
@@ -99,6 +104,8 @@ function addRouteRecord (
           : { default: route.props }
   }
 
+  // 如果route存在children, 我们会递归的创建路由对象
+  // 递归的创建route对象
   if (route.children) {
     // Warn if route is named, does not redirect and has a default child route.
     // If users navigate to this route by name, the default child will
@@ -129,11 +136,13 @@ function addRouteRecord (
     })
   }
 
+  // 填充pathMap，nameMap，pathList
   if (!pathMap[record.path]) {
     pathList.push(record.path)
     pathMap[record.path] = record
   }
 
+  // 这里是对路由别名的处理
   if (route.alias !== undefined) {
     const aliases = Array.isArray(route.alias) ? route.alias : [route.alias]
     for (let i = 0; i < aliases.length; ++i) {

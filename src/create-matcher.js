@@ -18,8 +18,10 @@ export function createMatcher (
   router: VueRouter
 ): Matcher {
   // 处理 new Router 时传入的 routes 属性，整理成以下 3 个对象
+  // pathList, pathMap, nameMap 分别是路径的列表, 路径和路由对象的映射
   const { pathList, pathMap, nameMap } = createRouteMap(routes)
 
+  // 支持运行时动态添加更多的路由规则, 并动态的修改pathList，pathMap，nameMap
   function addRoutes (routes) {
     createRouteMap(routes, pathList, pathMap, nameMap)
   }
@@ -30,7 +32,7 @@ export function createMatcher (
     currentRoute?: Route, // 当前url对应的route对象
     redirectedFrom?: Location // 重定向
   ): Route {
-    // 解析当前 url，得到 hash、path、query和name等信息
+    // 会对raw，currentRoute处理，返回格式化后path, hash, 以及params
     const location = normalizeLocation(raw, currentRoute, false, router)
     const { name } = location
 
@@ -43,6 +45,7 @@ export function createMatcher (
       }
       // 不存在记录 返回
       if (!record) return _createRoute(null, location)
+      // 获取所有必须的params。如果optional为true说明params不是必须的
       const paramNames = record.regex.keys
         .filter(key => !key.optional)
         .map(key => key.name)
@@ -69,6 +72,7 @@ export function createMatcher (
       for (let i = 0; i < pathList.length; i++) {
         const path = pathList[i]
         const record = pathMap[path]
+        // 使用pathList中的每一个regex，对path进行匹配
         if (matchRoute(record.regex, location.path, location.params)) {
           return _createRoute(record, location, redirectedFrom)
         }
